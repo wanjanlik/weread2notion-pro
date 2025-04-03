@@ -88,7 +88,11 @@ def get_date(start, end=None):
 
 
 def get_icon(url):
-    return {"type": "external", "external": {"url": url}}
+    """验证 URL 并生成 Notion icon 结构"""
+    if url and isinstance(url, str) and url.startswith(("http://", "https://")):
+        return {"external": {"url": url}}
+    else:
+        return None  # 避免传递无效 URL
 
 
 def get_select(name):
