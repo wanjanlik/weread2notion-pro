@@ -49,3 +49,10 @@ jobs:
       - name: weread sync
         run: |
           python -u scripts/weread.py
+      - name: Upload covers to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./cover      # 上传本地 cover 目录
+          keep_files: true          # 保留历史文件
+          destination_dir: covers   # 可选：指定托管子目录
