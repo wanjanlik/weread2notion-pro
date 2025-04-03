@@ -335,8 +335,29 @@ class NotionHelper:
         )
 
     @retry(stop_max_attempt_number=3, wait_fixed=5000)
-    def create_page(self, parent, properties, icon):
-        return self.client.pages.create(parent=parent, properties=properties, icon=icon)
+    def create_page(self, parent, properties, icon_url=None):
+    # 严格校验 icon_url
+    if icon_url and isinstance(icon_url, str) and icon_url.startswith(("http://", "https://")):
+        icon = {"external": {"url": icon_url}}
+    else:
+        icon = None  # 完全跳过无效的封面
+        
+    try:
+        return self.client.pages.create(
+            parent=parent,
+            properties=properties,
+            icon=icon
+        )
+    except APIResponseError as e:
+        if "body.icon.external.url" in str(e):
+            print(f"⚠️ 封面 URL 无效，已跳过。URL: {icon_url}")
+            return self.client.pages.create(
+                parent=parent,
+                properties=properties,
+                icon=None  # 强制不设置封面
+            )
+        else:
+            raise e
 
     @retry(stop_max_attempt_number=3, wait_fixed=5000)
     def query(self, **kwargs):
