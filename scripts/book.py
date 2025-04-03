@@ -227,5 +227,14 @@ if __name__ == "__main__":
     books = bookshelf_books.get("books")
     books = [d["bookId"] for d in books if "bookId" in d]
     books = list((set(notebooks) | set(books)) - set(not_need_sync))
+    
     for index, bookId in enumerate(books):
-        insert_book_to_notion(books, index, bookId)
+        try:
+            insert_book_to_notion(books, index, bookId)
+        except Exception as e:
+            # 获取书名（新增逻辑）
+            book_info = weread_api.get_bookinfo(bookId)
+            book_title = book_info.get("title", "未知书籍") if book_info else "未知书籍"
+            print(f"❌ 插入书籍《{book_title}》(ID: {bookId}) 失败，错误: {str(e)}")
+            print("⏩ 跳过本书，继续处理下一本...")
+            continue
