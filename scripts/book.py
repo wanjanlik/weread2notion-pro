@@ -1,7 +1,7 @@
 import argparse
 from datetime import datetime, timedelta
 import os
-
+from urllib.parse import urljoin
 import pendulum
 import requests
 from notion_helper import NotionHelper
@@ -57,13 +57,19 @@ def insert_book_to_notion(books, index, bookId):
     readInfo.update(readInfo.get("bookInfo", {}))
     book.update(readInfo)
     cover = book.get("cover")
-    if cover.startswith("http"):
-        if not cover.endswith(".jpg"):
-            cover = utils.upload_cover(cover)
-        else:
-            cover = cover.replace("/s_", "/t7_")
+    # 检查封面有效性
+if cover and isinstance(cover, str) and cover.startswith("http"):
+    # 统一上传封面（假设 utils.upload_cover 已处理异常）
+    uploaded_url = utils.upload_cover(cover)
+    if uploaded_url:
+        cover = uploaded_url
     else:
+        print(f"⚠️ 封面上传失败，使用默认图标: {cover}")
         cover = BOOK_ICON_URL
+else:
+    cover = BOOK_ICON_URL
+
+book["封面"] = cover  # 确保始终有有效值
     isbn = book.get("isbn")
     if isbn and isbn.strip():
         douban_url = get_douban_url(isbn)
