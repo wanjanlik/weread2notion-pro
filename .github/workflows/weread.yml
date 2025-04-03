@@ -43,7 +43,9 @@ jobs:
           pip install -r requirements.txt
       - name: weread book sync
         run: |
-          python -u scripts/book.py
+         python -u scripts/book.py --verbose
+        env:
+         DEBUG_COVER: "true"
       - name: weread sync
         run: |
           python -u scripts/weread.py
